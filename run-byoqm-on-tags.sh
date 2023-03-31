@@ -1,18 +1,23 @@
 # Exit on first error
 set -e
 
+# Determine which repository to execute on
+
+local_repo_path="../$1"
+
 # Convert each tag to a directory
-flask_tags_dir="../flask-tags"
+tags_dir="${local_repo_path}-tags"
 
-rm -rf "$flask_tags_dir"
-mkdir -p "$flask_tags_dir"
+rm -rf "$tags_dir"
+mkdir -p "$tags_dir"
 
+cd "$local_repo_path"
 for tag in $(git tag)
 do
   git checkout $tag
-  new_dir="${flask_tags_dir}/flask-${tag}"
+  new_dir="${tags_dir}/flask-${tag}"
   cp -r . "$new_dir"
-  rm "${new_dir}/data_script.sh"
+  rm -f "${new_dir}/data_script.sh"
 done
 
 git checkout main
@@ -22,6 +27,6 @@ cd ../QualityTool
 
 for flask_ver in $(ls ../flask-tags/)
 do
-  echo "Executing: poetry run main ../flask-tags/${flask_ver} code_climate python --show-graphs=false"
-  poetry run main "../flask-tags/${flask_ver}" code_climate python --show-graphs=false
+  echo "Executing: poetry run main ${tags_dir}/${flask_ver} code_climate python --show-graphs=false"
+  poetry run main "${tags_dir}/${flask_ver}" code_climate python --show-graphs=false
 done 
