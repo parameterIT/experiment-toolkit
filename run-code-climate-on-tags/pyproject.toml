@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "code-climate-testing"
+version = "0.1.0"
+description = "A tool for collecting results from CodeClimates API and converting to a CSV file compliant with our tool"
+authors = ["Christoffer Gram <chkg@itu.dk>"]
+license = "AGPL v3"
+readme = "README.md"
+packages = [{include = "code_climate_testing"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.28.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
