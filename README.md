@@ -42,11 +42,11 @@ experiment-toolkit
   <repo>-tagz
 ```
 
-Second run the Code Climate tool pointing it to the remote of the git repository that you are inspecting:
+Second run the Code Climate tool pointing referring to the remote of the aforementioned local repository as a github slug in the format `username/repository-name`:
 
 ```.sh
 cd run-code-climate-on-tags
-poetry run python main.py
+poetry run python main.py <github-slug>
 ```
 
 Now move the results of the `byoqm` tool and the Code Climate tool into `visualization/output/byoqm` and `visualization/output/code_climate` respectively.

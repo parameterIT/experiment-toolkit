@@ -17,12 +17,6 @@ def switch_repo(github_slug: str):
         [f"cd ../testing && git remote add target {github_url}"],
         shell=True,
     )
-    # subprocess.run(
-    #     [
-    #         "cd ../testing && git remote add origin git@github.com:parameterIT/testing.git"
-    #     ],
-    #     shell=True,
-    # )
     subprocess.run(["cd ../testing && git fetch target"], shell=True)
     subprocess.run(["cd ../testing && git fetch target --tags"], shell=True)
     subprocess.run(["cd ../testing && git checkout main"], shell=True)
