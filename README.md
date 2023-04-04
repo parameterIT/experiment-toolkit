@@ -58,5 +58,7 @@ Then you can run the visualization tool:
 
 ```sh
 cd visualization
-poetry run python main.py
+poetry run python main.py <png-file-prefix>
 ```
+
+Where `<png-file-prefix>` will be prepended to the file name of any PNG file that is generated to help organize the output.
