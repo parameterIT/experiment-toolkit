@@ -81,6 +81,11 @@ def get_figure() -> List[figure]:
         byoqm_values = byoqm_data[metric]
         if metric == "method_complexity":
             byoqm_values = byoqm_data["cognitive_complexity"]
+        elif metric == "identical-code":
+            byoqm_values = byoqm_data["identical_code"]
+        elif metric == "similar-code":
+            byoqm_values = byoqm_data["similar_code"]
+
         figures.append(_get_line(code_climate_values, byoqm_values, metric))
 
     return figures

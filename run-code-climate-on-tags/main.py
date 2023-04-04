@@ -24,7 +24,7 @@ def main():
         )
         exit(1)
 
-    git_folder: Path = Path("..") / Path("target") / Path(".git")
+    git_folder: Path = Path("..") / Path("..") / Path("target") / Path(".git")
 
     github_slug = sys.argv[1]
     git.switch_repo(github_slug)
