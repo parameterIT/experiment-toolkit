@@ -10,6 +10,7 @@ packages = [{include = "comparison_graphs"}]
 python = "^3.10"
 pandas = "^1.5.3"
 bokeh = "^3.1.0"
+selenium = "^4.8.3"
 
 
 [build-system]

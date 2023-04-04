@@ -22,6 +22,9 @@ experiment-toolkit
 
 Where `repo` is a local copy of repository that you wish to execute the experiment on.
 
+To visualize the results you need to follow some set-up related to bokeh.
+The following [link](https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html) explains the set-up on their documentation.
+
 ## Running
 
 First run `byoqm` on the local repository by executing
@@ -48,6 +51,7 @@ Second run the Code Climate tool pointing referring to the remote of the aforeme
 cd run-code-climate-on-tags
 poetry run python main.py <github-slug>
 ```
+
 
 Now move the results of the `byoqm` tool and the Code Climate tool into `visualization/output/byoqm` and `visualization/output/code_climate` respectively.
 Then you can run the visualization tool:

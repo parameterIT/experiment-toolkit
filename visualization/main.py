@@ -1,20 +1,23 @@
 from collections import defaultdict
 from datetime import datetime
 from bokeh.plotting import figure
-from bokeh.layouts import gridplot
-from bokeh.plotting import show
+from bokeh.io import export_png
 import os
 import pandas as pd
-import bokeh
 from typing import List, Tuple
+import sys
 
 
 def main():
+    file_prefix = ""
+    if len(sys.argv) > 1:
+        # The second argument passed to the program is a common file prefix for output
+        # png files for better organisation, not passing the argument adds no prefix
+        file_prefix = sys.argv[1]
+
     figures = get_figure()
-    gridplots = gridplot(
-        [[figures[i], figures[i + 1]] for i in range(0, len(figures) - 1, 2)],
-    )
-    show(gridplots)
+    for f in figures:
+        export_png(f, filename=f"imgs/{file_prefix}-{f.title.text}.png")
 
 
 def read_data(tool: str):
@@ -38,20 +41,6 @@ def get_tag_number(tool: str, filename):
     for qm, src in df.itertuples(index=False, name=None):
         path_parts = src.split("/")
         return path_parts[len(path_parts) - 1]
-
-
-# def _get_line(data, key):
-#     x = [(value[0]) for value in data[key]]
-#     y = [(value[1]) for value in data[key]]
-#     p = figure(
-#         width=600,
-#         height=350,
-#         title=key,
-#         x_axis_label="Tag Nr.",
-#         y_axis_label="No. Violations",
-#     )
-#     p.line(x, y, legend_label="Progress", line_width=2)
-# return p
 
 
 def _get_line(
@@ -84,7 +73,7 @@ def _get_line(
     return p
 
 
-def get_figure():
+def get_figure() -> List[figure]:
     code_climate_data = read_data("code_climate")
     byoqm_data = read_data("byoqm")
     figures = []
