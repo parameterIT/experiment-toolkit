@@ -16,6 +16,10 @@ def switch_repo(github_slug: str):
     github_url = f"git@github.com:{github_slug}.git"
 
     subprocess.run(
+        [f"cd ../../testing && git remote remove target"],
+        shell=True,
+    )
+    subprocess.run(
         [f"cd ../../testing && git remote add target {github_url}"],
         shell=True,
     )
