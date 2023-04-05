@@ -18,20 +18,17 @@ def main():
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         logging.error(
-            "Usage: main.py <GITHUB_SLUG>, where GITHUB_SLUG is in the format 'username/reponame' on GitHub"
+            "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG>, where GITHUB_SLUG is in the format 'username/reponame' on GitHub"
         )
         exit(1)
 
-    git_folder: Path = Path("..") / Path("..") / Path("target") / Path(".git")
-
-    github_slug = sys.argv[1]
+    target_dir = sys.argv[1]
+    github_slug = sys.argv[2]
     git.switch_repo(github_slug)
 
-    tags = git.read_tags()
-    print(tags)
-    print(tags)
+    tags = git.read_tags(target_dir)
     git.iterate_over_tags(tags, work)
 
 
