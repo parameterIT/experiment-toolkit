@@ -22,13 +22,12 @@ experiment-toolkit
 
 Where `repository` is a local copy of repository that you wish to execute the experiment on.
 
-Furthermore, you will need to have cloned the parameterIT/testing repository as a sibling directory as well, and have a seperate folder called 'target'. The final folder structure should look something like this: 
+Furthermore, you will need to have cloned the parameterIT/testing repository as a sibling directory as well. The final folder structure should look something like this: 
 ```
 <repo>
   .git
 experiment-toolkit
 testing
-target
 ```
 
 To visualize the results you need to follow some set-up related to bokeh.
