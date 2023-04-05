@@ -25,12 +25,19 @@ Where `repo` is a local copy of repository that you wish to execute the experime
 To visualize the results you need to follow some set-up related to bokeh.
 The following [link](https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html) explains the set-up on their documentation.
 
-## Running
+This tool also requires the user to have poetry installed.
 
-First run `byoqm` on the local repository by executing
+## Running
+First ensure that you are in the `experiment-toolkit` folder.
+
+Then run `byoqm` on the local repository by executing
 
 ```sh
-./run-byoqm-on-tags.sh
+./run-byoqm-on-tags.sh <repository-name>
+```
+e.g.
+```sh
+./run-byoqm-on-tags.sh flask
 ```
 
 This will produce a sibling folder name `<repo>-tags` so that you have the folder structure:
@@ -45,10 +52,26 @@ experiment-toolkit
   <repo>-tagz
 ```
 
-Second run the Code Climate tool pointing referring to the remote of the aforementioned local repository as a github slug in the format `username/repository-name`:
-
+Second, change your working directory to the following directory, and run poetry install:
 ```.sh
 cd run-code-climate-on-tags
+poetry install
+```
+Before running the actual tool, you will need to export a code climate aythentication token. You can generate a token on the following website after having connected it to github:
+https://codeclimate.com/profile/tokens
+
+Export linux:
+```
+CODE_CLIMATE_TOKEN="<YOUR-CODE-CLIMATE-ACCESS-TOKEN>"
+```
+Export Mac:
+```
+export CODE_CLIMATE_TOKEN=<YOUR-CODE-CLIMATE-ACCESS-TOKEN>
+```
+
+Second run the Code Climate tool pointing referring to the remote of the aforementioned local repository as a github slug in the format `username/repository-name`:
+
+```sh
 poetry run python main.py <github-slug>
 ```
 
