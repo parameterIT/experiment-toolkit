@@ -5,7 +5,7 @@ Additionally, it contains the actual data that we have used in our comparison of
 It consists of three parts:
 
 1. A bash script to run our tool on all the tags of a given git repository
-2. A python program to run code climate on all the tags of a given git repository, outputting in a format compatible with our tool
+2. A python program to run code climate on all the tags of a given git repository, outputting in a format compatible with our tool (this can also be run through a bash script)
 3. A python program that can visualize the outputs of the two aforementioned parts using bokeh
 
 ## Set-up 
@@ -15,12 +15,12 @@ Second, tool (1) requires that the git repository you wish to execute `byoqm` on
 Make sure that you have the following folder structure:
 
 ```
-<repo>
+<repository>
   .git
 experiment-toolkit
 ```
 
-Where `repo` is a local copy of repository that you wish to execute the experiment on.
+Where `repository` is a local copy of repository that you wish to execute the experiment on.
 
 Furthermore, you will need to have cloned the parameterIT/testing repository as a sibling directory as well, and have a seperate folder called 'target'. The final folder structure should look something like this: 
 ```
@@ -66,7 +66,7 @@ Second, change your working directory to the following directory, and run poetry
 cd run-code-climate-on-tags
 poetry install
 ```
-Before running the actual tool, you will need to export a code climate authentication token. You can generate a token on the following website after having connected it to github https://codeclimate.com/profile/tokens.
+For the following part, you will need a code climate authentication token. You can generate a token on the following website after having connected it to github https://codeclimate.com/profile/tokens.
 
 To run the shell script, you will need a '.env' file with a token export command:
 ```sh
@@ -86,7 +86,7 @@ export CODE_CLIMATE_TOKEN=<YOUR-CODE-CLIMATE-ACCESS-TOKEN>
 
 Remember to save the file.
 
-Second run the Code Climate tool pointing referring to the remote of the aforementioned local repository as a github slug in the format `username/repository-name`:
+Now, run the Code Climate tool by using the following command. NOTE: github-slug in the format `username/repository-name`:
 
 ```sh
 ./run.sh <repo> <github-slug>
@@ -97,7 +97,7 @@ e.g.
 ```
 
 
-Now move the results of the `byoqm` tool and the Code Climate tool into `visualization/output/byoqm` and `visualization/output/code_climate` respectively.
+Finally, move the results of the `byoqm` tool and the Code Climate tool into `visualization/output/byoqm` and `visualization/output/code_climate` respectively.
 Then you can run the visualization tool:
 
 ```sh
