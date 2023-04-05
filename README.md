@@ -92,7 +92,7 @@ export CODE_CLIMATE_TOKEN=<YOUR-CODE-CLIMATE-ACCESS-TOKEN>
 
 Remember to save the file.
 
-Now, run the Code Climate tool by using the following command. NOTE: github-slug in the format `username/repository-name`:
+Now, run the Code Climate tool by using the following command. NOTE: github-slug is in the format `username/repository-name`:
 
 ```sh
 ./run.sh <repo> <github-slug>
