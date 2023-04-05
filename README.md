@@ -29,6 +29,13 @@ Furthermore, you will need to have cloned the parameterIT/testing repository as 
 experiment-toolkit
 testing
 ```
+An exampel of what the folder structure could look like would be: 
+```
+flask
+  .git
+experiment-toolkit
+testing
+```
 
 To visualize the results you need to follow some set-up related to bokeh.
 The following [link](https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html) explains the set-up on their documentation.
