@@ -22,6 +22,15 @@ experiment-toolkit
 
 Where `repo` is a local copy of repository that you wish to execute the experiment on.
 
+Furthermore, you will need to have cloned the parameterIT/testing repository as a sibling directory as well, and have a seperate folder called 'target'. The final folder structure should look something like this: 
+```
+<repo>
+  .git
+experiment-toolkit
+testing
+target
+```
+
 To visualize the results you need to follow some set-up related to bokeh.
 The following [link](https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html) explains the set-up on their documentation.
 
@@ -57,22 +66,34 @@ Second, change your working directory to the following directory, and run poetry
 cd run-code-climate-on-tags
 poetry install
 ```
-Before running the actual tool, you will need to export a code climate aythentication token. You can generate a token on the following website after having connected it to github:
-https://codeclimate.com/profile/tokens
+Before running the actual tool, you will need to export a code climate authentication token. You can generate a token on the following website after having connected it to github https://codeclimate.com/profile/tokens.
 
-Export linux:
+To run the shell script, you will need a '.env' file with a token export command:
+```sh
+touch .env
+```
+
+Open the .env file and insert the following command:
+
+linux:
 ```
 CODE_CLIMATE_TOKEN="<YOUR-CODE-CLIMATE-ACCESS-TOKEN>"
 ```
-Export Mac:
+mac:
 ```
 export CODE_CLIMATE_TOKEN=<YOUR-CODE-CLIMATE-ACCESS-TOKEN>
 ```
 
+Remember to save the file.
+
 Second run the Code Climate tool pointing referring to the remote of the aforementioned local repository as a github slug in the format `username/repository-name`:
 
 ```sh
-poetry run python main.py <github-slug>
+./run.sh <repo> <github-slug>
+```
+e.g.
+```sh
+./run.sh flask pallets/flask
 ```
 
 
