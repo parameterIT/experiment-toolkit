@@ -3,8 +3,10 @@ from pathlib import Path
 from typing import Callable, List
 
 
-def read_tags():
-    tags_out = subprocess.check_output(["cd ../../target && git tag -l"], shell=True)
+def read_tags(dir_name: str):
+    tags_out = subprocess.check_output(
+        [f"cd ../../{dir_name} && git tag -l"], shell=True
+    )
     tags = [tag.decode("utf-8") for tag in tags_out.splitlines()]
     # Assumes versioning lexographical sort is chronological
     return tags
