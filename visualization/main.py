@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 from bokeh.plotting import figure
+from bokeh.models import Range1d
 from bokeh.io import export_png
 import os
 import pandas as pd
@@ -70,6 +71,7 @@ def _get_line(
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
+    p.y_range = Range1d(0, (int(max(other_qm_ys)) * 1.1))
     return p
 
 
