@@ -35,6 +35,6 @@ cd ../tool
 
 for tag in $(ls ${tags_dir}/)
 do
-  echo "Executing: poetry run modu ${tags_dir}/${tag} code_climate $2 --show-graphs=false"
-  poetry run modu "${tags_dir}/${tag}" code_climate $2 --show-graphs=false
+  echo "Executing: poetry run modu ${tags_dir}/${tag} code_climate --show-graphs=false"
+  poetry run modu "${tags_dir}/${tag}" code_climate --show-graphs=false
 done 
