@@ -28,7 +28,7 @@ do
   rm -f "${new_dir}/data_script.sh"
 done
 
-git checkout main
+git checkout master
 
 # Run byoqm on each flask folder
 cd ../tool
