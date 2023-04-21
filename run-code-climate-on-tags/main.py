@@ -152,7 +152,7 @@ def block_while_build_is_running():
         for build in builds:
             if build["attributes"]["state"] == "running":
                 should_check_builds = True
-        time.sleep(5)
+        time.sleep(10)
 
 
 if __name__ == "__main__":
