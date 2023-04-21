@@ -28,13 +28,13 @@ do
   rm -f "${new_dir}/data_script.sh"
 done
 
-git checkout master
+git checkout main
 
 # Run modu on each flask folder
 cd ../tool
 
 for tag in $(ls ${tags_dir}/)
 do
-  echo "Executing: poetry run main ${tags_dir}/${tag} code_climate $2 --show-graphs=false"
+  echo "Executing: poetry run modu ${tags_dir}/${tag} code_climate $2 --show-graphs=false"
   poetry run main "${tags_dir}/${tag}" code_climate $2 --show-graphs=false
 done 
