@@ -1,5 +1,4 @@
 from collections import defaultdict
-from datetime import datetime
 from bokeh.plotting import figure
 from bokeh.io import export_png
 import os
@@ -25,10 +24,11 @@ def read_data(tool: str):
     graph_data = defaultdict(list)
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
-        tagNumber = get_tag_number(tool, filename)
+        tag_number = get_tag_number(tool, filename)
         df = pd.read_csv(filepath, skiprows=0)
         for metric, value in df.itertuples(index=False, name=None):
-            graph_data[metric].append((tagNumber, value))
+            graph_data[metric].append((tag_number, value))
+
     for _, v in graph_data.items():
         v.sort()
     return graph_data

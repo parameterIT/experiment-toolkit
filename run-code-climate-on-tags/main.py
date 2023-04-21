@@ -9,6 +9,8 @@ import git
 from pathlib import Path
 from typing import Dict, List
 
+USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG> <Testing Repo>\nwhere GITHUB_SLUG is in the format 'username/reponame' on GitHub"
+
 ACCESS_TOKEN = os.getenv("CODE_CLIMATE_TOKEN")
 CODE_CLIMATE_REPO = "parameterIT/testing"
 
@@ -18,18 +20,27 @@ def main():
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
 
-    if len(sys.argv) < 3:
-        logging.error(
-            "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG>, where GITHUB_SLUG is in the format 'username/reponame' on GitHub"
-        )
+    if len(sys.argv) != 4:
+        logging.error("Incorrect number of arguments supplied")
+        print(USAGE_STRING)
         exit(1)
 
-    target_dir = sys.argv[1]
+    target_dir = Path(sys.argv[1])
+    if not target_dir.exists():
+        logging.error("Local copy of git repository does not exist")
+        print(USAGE_STRING)
+        exit(1)
+
+    testing_repo = Path(sys.argv[3])
+    if not testing_repo.exists():
+        logging.error("Testing repository does not exist")
+        print(USAGE_STRING)
+
     github_slug = sys.argv[2]
-    git.switch_repo(github_slug)
+    git.switch_repo(testing_repo, github_slug)
 
     tags = git.read_tags(target_dir)
-    git.iterate_over_tags(tags, work)
+    git.iterate_over_tags(tags, work, testing_repo)
 
 
 def work(tag: str):
