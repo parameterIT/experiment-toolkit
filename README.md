@@ -48,11 +48,11 @@ First ensure that you are in the `experiment-toolkit` folder.
 Then run `byoqm` on the local repository by executing
 
 ```sh
-./run-byoqm-on-tags.sh <repository-name> <language>
+./run-modu-on-tags.sh <repository-name> <language>
 ```
 e.g.
 ```sh
-./run-byoqm-on-tags.sh flask python
+./run-modu-on-tags.sh flask python
 ```
 
 This will produce a sibling folder name `<repo>-tags` so that you have the folder structure:

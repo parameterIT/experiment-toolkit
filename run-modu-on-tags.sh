@@ -30,7 +30,7 @@ done
 
 git checkout master
 
-# Run byoqm on each flask folder
+# Run modu on each flask folder
 cd ../tool
 
 for tag in $(ls ${tags_dir}/)
