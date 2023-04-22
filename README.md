@@ -61,7 +61,7 @@ First ensure that you are in the `experiment-toolkit` folder.
 Then run _modu_ on the local repository by executing
 
 ```sh
-./run-modu-on-tags.py <relative-path-to-modu's-git-root-folder> <path-to-folder-containing-tags>
+./run-modu-on-tags.py <relative-path-to-git-root-folder-of-modu> <path-to-folder-containing-tags>
 ```
 
 For example with the directory tree:
@@ -121,7 +121,7 @@ Remember to save the file.
 Now, run the Code Climate tool by using the following command. NOTE: github-slug is in the format `username/repository-name`:
 
 ```sh
-./run.sh <path to local copy of repository> <github-slug of the repo's remote> <path to testing repository>
+./run.sh <path to local copy of repository> <github-slug of the remote of the repo> <path to testing repository>
 ```
 
 For example with the directory structure:
