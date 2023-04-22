@@ -21,7 +21,7 @@ def main():
 
 
 def read_data(tool: str):
-    path = "./output/" + tool + "/frequencies/"
+    path = "./output/" + tool + "/outcome/"
     graph_data = defaultdict(list)
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
@@ -66,7 +66,7 @@ def _get_line(
     p.line(
         other_qm_xs,
         other_qm_ys,
-        legend_label="byoqm",
+        legend_label="modu",
         line_width=2,
         color="red",
     )
@@ -77,18 +77,18 @@ def _get_line(
 
 def get_figure() -> List[figure]:
     code_climate_data = read_data("code_climate")
-    byoqm_data = read_data("byoqm")
+    modu_data = read_data("modu")
     figures = []
     for metric, code_climate_values in code_climate_data.items():
-        byoqm_values = byoqm_data[metric]
+        modu_values = modu_data[metric]
         if metric == "method_complexity":
-            byoqm_values = byoqm_data["cognitive_complexity"]
+            modu_values = modu_data["cognitive_complexity"]
         elif metric == "identical-code":
-            byoqm_values = byoqm_data["identical_code"]
+            modu_values = modu_data["identical_code"]
         elif metric == "similar-code":
-            byoqm_values = byoqm_data["similar_code"]
+            modu_values = modu_data["similar_code"]
 
-        figures.append(_get_line(code_climate_values, byoqm_values, metric))
+        figures.append(_get_line(code_climate_values, modu_values, metric))
 
     return figures
 
