@@ -41,7 +41,7 @@ For example:
 yields the directory-tree:
 ```
 experiment-toolkit
-  \_ explode-git-tags-into-folders.sh
+  \_ run-modu-on-tags.py
 flask
   \_ .git
 flask-tags
@@ -86,7 +86,7 @@ modu
 You can run the command
 
 ```sh
-./run-modu-on-tags.sh ../modu ../flask-tags
+./run-modu-on-tags.py ../modu ../flask-tags
 ```
 
 This will execute _modu_ on each of the sub-directories in `flask-tags`, saving the results to _modu_'s default output (the output folder in the _modu_ folder)
