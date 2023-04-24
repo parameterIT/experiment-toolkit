@@ -28,7 +28,7 @@ def read_data(tool: str):
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
         tag_number = get_tag_number(tool, filename)
-        df = pd.read_csv(filepath, skiprows=0)
+        df = pd.read_csv(filepath, skiprows=0, dtype={"value":int, "metric":str})
         for metric, value in df.itertuples(index=False, name=None):
             graph_data[metric].append((tag_number, value))
 
