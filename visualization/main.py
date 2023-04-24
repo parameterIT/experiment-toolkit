@@ -71,7 +71,8 @@ def _get_line(
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
-    p.y_range = Range1d(0, (int(max(other_qm_ys)) * 1.1))
+    max_element = max(one_qm_ys + other_qm_ys)
+    p.y_range = Range1d(0, (int(max_element) * 1.1))
     return p
 
 
