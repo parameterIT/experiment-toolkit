@@ -73,7 +73,7 @@ def _get_line(
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
-    max_element = max(one_qm_ys + other_qm_ys)
+    max_element = max(one_qm_ys.extend(other_qm_ys))
     try:
         if max_element != '0':
                 p.y_range = Range1d(0, int(max_element) * 1.1)
