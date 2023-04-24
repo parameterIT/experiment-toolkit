@@ -1,4 +1,6 @@
 from collections import defaultdict
+from datetime import datetime
+import logging
 from bokeh.plotting import figure
 from bokeh.models import Range1d
 from bokeh.io import export_png
@@ -71,7 +73,13 @@ def _get_line(
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
-    p.y_range = Range1d(0, (int(max(other_qm_ys)) * 1.1))
+    max_element = max(one_qm_ys.extend(other_qm_ys))
+    try:
+        if max_element != '0':
+                p.y_range = Range1d(0, int(max_element) * 1.1)
+    except ValueError:
+            logging.warning(("No data to plot created for", metric))
+            return
     return p
 
 
