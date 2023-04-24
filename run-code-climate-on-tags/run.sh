@@ -4,8 +4,8 @@ set -a
 source .env
 set +a
 
-mkdir -p output/frequencies
+mkdir -p output/outcome
 mkdir -p output/metadata
 mkdir -p output/locations
 
-poetry run python main.py $1 $2
+poetry run python main.py $1 $2 $3
