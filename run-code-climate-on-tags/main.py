@@ -6,6 +6,9 @@ import time
 import csv
 import git
 
+
+import code_climate
+
 from pathlib import Path
 from typing import Dict, List
 
@@ -44,36 +47,37 @@ def main():
 
 
 def work(tag: str):
-    # Assumes that GitHub slug has a "global scope" that can be referenced through sys.argv[1]
-    github_slug = sys.argv[1]
+    time.sleep(10)
+    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
+    github_slug = sys.argv[2]
 
-    block_while_build_is_running()
+    repo_id = client.get_id_for_repo("parameterIT/testing")
+    print("REPO ID:", repo_id)
+    latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
+    client.block_until_complete(latest_build)
+
+    snapshot = client.get_latest_snapshot("parameterIT/testing")
+    print(snapshot.id)
+
+    issues = client.get_all_issues(snapshot)
     results = {}
     locations = []
-
-    for issue in get_issues():
-        check_name = issue["attributes"]["check_name"]
-        category = issue["attributes"]["categories"][0]
+    for issue in issues:
         try:
-            results[check_name] = results[check_name] + 1
+            results[issue.metric] = results[issue.metric] + 1
         except KeyError:
-            results[check_name] = 1
+            results[issue.metric] = 1
 
         try:
-            results[category] = results[category] + 1
+            results[issue.aggregates_into] = results[issue.aggregates_into] + 1
         except KeyError:
-            results[category] = 1
-
-        location = issue["attributes"]["location"]
-        # This fits with the .csv format: type, file, start, end
-        locations.append(
-            [check_name, location["path"], location["start_line"], location["end_line"]]
-        )
+            results[issue.aggregates_into] = 1
 
     write_to_csv(results, locations, github_slug, tag)
 
 
 def get_repo():
+    # Will need aspectrs of this to get the Repo ID
     """
     gets a repo from the github slug. github slug is a "username/reponame" format
     """
@@ -85,6 +89,7 @@ def get_repo():
 
 
 def get_latest_build_snapshot():
+    # This can be made redundant if we get the correct, latest build
     repo = get_repo()
     latest_build_snapshot = repo["data"][0]["relationships"][
         "latest_default_branch_snapshot"
@@ -102,6 +107,9 @@ def get_issues():
     headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
 
     r = requests.get(target, headers=headers)
+    print("---------------------------------------------------------------------------")
+    print(r.json())
+    print("---------------------------------------------------------------------------")
     return r.json()["data"]
 
 
@@ -148,10 +156,17 @@ def _write_locations(file_name: Path, locations: List):
 def get_builds():
     repo_id = get_repo()["data"][0]["id"]
 
+    # Need to make sure that target is the first page result
+    # Need to get the max build number, which can be found in {index}/attributes/number
+    # Assume that the first page of results will contain the newest build (i.e. chronologically descending)
+    # Make it give one build
     target = f"https://api.codeclimate.com/v1/repos/{repo_id}/builds"
     headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
 
     r = requests.get(target, headers=headers)
+    print("---------------------------------------------------------------------------")
+    print(r.json())
+    print("---------------------------------------------------------------------------")
     return r.json()["data"]
 
 
