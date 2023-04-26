@@ -144,7 +144,7 @@ This will produce .csv files that match the format of _modu_ using results gathe
 
 ### Visualization
 
-Move the results of the _modu_ tool and the Code Climate tool into `visualization/output/byoqm` and `visualization/output/code_climate` respectively.
+Move the results of the _modu_ tool and the Code Climate tool into `visualization/output/modu` and `visualization/output/code_climate` respectively.
 Then you can run the visualization tool:
 
 ```sh
