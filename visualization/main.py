@@ -97,7 +97,12 @@ def get_figure() -> List[figure]:
     modu_data = read_data("modu")
     figures = []
     for metric, code_climate_values in code_climate_data.items():
-        modu_values = modu_data[metric]
+        # coupled with the the modu tool, since all metrics of the of modu's
+        # implementation of code climate are lower-case
+        modu_values = modu_data[metric.lower()]
+        # if-elif chain coupled with the modu tool to translate metrics reported by
+        # code climate's API with the names of the metrics in modu's implementation of
+        # code climate
         if metric == "method_complexity":
             modu_values = modu_data["cognitive_complexity"]
         elif metric == "identical-code":
