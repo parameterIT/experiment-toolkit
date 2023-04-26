@@ -28,7 +28,16 @@ def read_data(tool: str):
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
         tag_number = get_tag_number(tool, filename)
-        df = pd.read_csv(filepath, skiprows=0, dtype={"value":int, "metric":str})
+        df = pd.read_csv(
+            filepath,
+            skiprows=0,
+            dtype={"value": int, "metric": str},
+            # Assumes that maintainabilty (the only non-int value) is at the bottom of
+            # each csv file
+            skipfooter=1,
+            engine="python",
+        )
+
         for metric, value in df.itertuples(index=False, name=None):
             graph_data[metric].append((tag_number, value))
 
@@ -75,11 +84,11 @@ def _get_line(
     p.xaxis.major_label_orientation = "vertical"
     max_element = max(one_qm_ys + other_qm_ys)
     try:
-        if max_element != '0':
-                p.y_range = Range1d(0, int(max_element) * 1.1)
+        if max_element != 0:
+            p.y_range = Range1d(0, int(max_element) * 1.1)
     except ValueError:
-            logging.warning(("No data to plot created for", metric))
-            return
+        logging.warning(("No data to plot created for", metric))
+        return
     return p
 
 
