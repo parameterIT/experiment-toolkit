@@ -39,8 +39,6 @@ def read_data(tool: str):
         )
 
         for metric, value in df.itertuples(index=False, name=None):
-            if tag_number == "flask-2.0.0rc1" or tag_number == "flask-2.0.0rc2":
-                continue
             graph_data[metric].append((tag_number, value))
 
     for _, v in graph_data.items():
