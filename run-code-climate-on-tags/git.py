@@ -33,6 +33,7 @@ def reset_repo(testing_repo: Path, commit: str):
 
 def iterate_over_tags(tags: List, action_between_tags: Callable, testing_repo: Path):
     for tag in tags:
+        print("-------------------------------------------------------------------")
         print(tag)
         reset_repo(testing_repo, tag)
         action_between_tags(tag)

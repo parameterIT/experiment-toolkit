@@ -52,12 +52,10 @@ def work(tag: str):
     github_slug = sys.argv[2]
 
     repo_id = client.get_id_for_repo("parameterIT/testing")
-    print("REPO ID:", repo_id)
     latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
     client.block_until_complete(latest_build)
 
     snapshot = client.get_latest_snapshot("parameterIT/testing")
-    print(snapshot.id)
 
     issues = client.get_all_issues(snapshot)
     results = {}
@@ -74,43 +72,6 @@ def work(tag: str):
             results[issue.aggregates_into] = 1
 
     write_to_csv(results, locations, github_slug, tag)
-
-
-def get_repo():
-    # Will need aspectrs of this to get the Repo ID
-    """
-    gets a repo from the github slug. github slug is a "username/reponame" format
-    """
-    target = f"https://api.codeclimate.com/v1/repos?github_slug={CODE_CLIMATE_REPO}"
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    return r.json()
-
-
-def get_latest_build_snapshot():
-    # This can be made redundant if we get the correct, latest build
-    repo = get_repo()
-    latest_build_snapshot = repo["data"][0]["relationships"][
-        "latest_default_branch_snapshot"
-    ]["data"]["id"]
-    return latest_build_snapshot
-
-
-def get_issues():
-    repo_id = get_repo()["data"][0]["id"]
-    snapshot_id = get_latest_build_snapshot()
-
-    target = (
-        f"https://api.codeclimate.com/v1/repos/{repo_id}/snapshots/{snapshot_id}/issues"
-    )
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    print("---------------------------------------------------------------------------")
-    print(r.json())
-    print("---------------------------------------------------------------------------")
-    return r.json()["data"]
 
 
 def write_to_csv(results: Dict, locations: List, src_root: str, tag: str):
@@ -151,35 +112,6 @@ def _write_locations(file_name: Path, locations: List):
         writer = csv.writer(locations_file)
         writer.writerow(["type", "file", "start", "end"])
         writer.writerows(locations)
-
-
-def get_builds():
-    repo_id = get_repo()["data"][0]["id"]
-
-    # Need to make sure that target is the first page result
-    # Need to get the max build number, which can be found in {index}/attributes/number
-    # Assume that the first page of results will contain the newest build (i.e. chronologically descending)
-    # Make it give one build
-    target = f"https://api.codeclimate.com/v1/repos/{repo_id}/builds"
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    print("---------------------------------------------------------------------------")
-    print(r.json())
-    print("---------------------------------------------------------------------------")
-    return r.json()["data"]
-
-
-def block_while_build_is_running():
-    should_check_builds = True
-    while should_check_builds == True:
-        builds = get_builds()
-        should_check_builds = False
-        for build in builds:
-            if build["attributes"]["state"] == "running":
-                should_check_builds = True
-        time.sleep(10)
-
 
 if __name__ == "__main__":
     main()

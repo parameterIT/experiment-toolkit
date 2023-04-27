@@ -7,26 +7,12 @@ from typing import List
 _BASE_CODE_CLIMATE_URL = "https://api.codeclimate.com/v1/"
 _PAGE_SIZE: int = 100
 
-
 class Build:
     def __init__(self, id: str, repo_id: str, number: int, state: str):
         self.id = id
         self.repo_id = repo_id
         self.number = number
         self.state = state
-
-
-def _build_from_json_resp(json_resp, repo_id) -> Build:
-    """
-    Returns the build corresponding described by json_resp.
-
-    json_resp must be the result of calling .json() on a requests response from a build on code_climate.
-    """
-    id = json_resp["data"][0]["id"]
-    number = json_resp["data"][0]["attributes"]["number"]
-    state = json_resp["data"][0]["attributes"]["state"]
-
-    return Build(id, number, state, repo_id)
 
 
 class Snapshot:
@@ -95,25 +81,7 @@ class Client:
         state = json_resp["data"]["attributes"]["state"]
 
         return Build(id, repo_id, number, state)
-
-    def get_snapshot_from_build_number(self, number: int, repo_id: str) -> Snapshot:
-        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds/{number}"
-        headers = {"Authorization": f"Token token={self.api_token}"}
-
-        resp = requests.get(target, headers=headers)
-        json_resp = resp.json()
-
-        snapshot_id = json_resp["data"]["relationships"]["snapshot"]["data"]["id"]
-
-        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/snapshots/{snapshot_id}"
-        headers = {"Authorization": f"Token token={self.api_token}"}
-
-        resp = requests.get(target, headers=headers)
-        json_resp = resp.json()
-
-        issue_count = int(json_resp["data"]["meta"]["issues_count"])
-
-        return Snapshot(snapshot_id, repo_id, issue_count)
+    
 
     def get_latest_snapshot(self, github_slug: str):
         target = f"{_BASE_CODE_CLIMATE_URL}repos?github_slug={github_slug}"
