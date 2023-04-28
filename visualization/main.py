@@ -19,7 +19,13 @@ def main():
         # The second argument passed to the program is a common file prefix for output
         # png files for better organisation, not passing the argument adds no prefix
         file_prefix = sys.argv[1]
-        file_prefix_length = sys.argv[2]
+        try:
+            file_prefix_length = int(sys.argv[2])
+        except ValueError:
+            print("Wrong type input.. poetry run main [STRING] [INT] ")
+            exit()
+
+
 
     figures = get_figure(file_prefix_length)
     for f in figures:
@@ -53,7 +59,7 @@ def read_data(tool: str, prefixlength : int):
 
 
     for _, v in graph_data.items():
-        v.sort(key=lambda t: gen_key(t[0][prefixlength:]))
+        v.sort(key=lambda t: gen_key(t[0][int(prefixlength):]))
 
     return graph_data
 
