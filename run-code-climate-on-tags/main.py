@@ -1,6 +1,5 @@
 import os
 import sys
-import requests
 import logging
 import time
 import csv
@@ -19,6 +18,8 @@ CODE_CLIMATE_REPO = "parameterIT/testing"
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     if ACCESS_TOKEN is None:
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
@@ -47,15 +48,16 @@ def main():
 
 
 def work(tag: str):
-    time.sleep(10)
     client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
     github_slug = sys.argv[2]
 
     repo_id = client.get_id_for_repo("parameterIT/testing")
     latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
+    logging.info(f"blocked by build {latest_build.id} with state {latest_build.state}")
     client.block_until_complete(latest_build)
 
     snapshot = client.get_latest_snapshot("parameterIT/testing")
+    logging.info(f"latest snapshot {snapshot.id}")
 
     issues = client.get_all_issues(snapshot)
     results = {}
@@ -112,6 +114,7 @@ def _write_locations(file_name: Path, locations: List):
         writer = csv.writer(locations_file)
         writer.writerow(["type", "file", "start", "end"])
         writer.writerows(locations)
+
 
 if __name__ == "__main__":
     main()
