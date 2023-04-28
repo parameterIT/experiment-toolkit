@@ -19,13 +19,17 @@ def main():
         # The second argument passed to the program is a common file prefix for output
         # png files for better organisation, not passing the argument adds no prefix
         file_prefix = sys.argv[1]
+        try:
+            file_prefix_length = int(sys.argv[2])
+        except ValueError:
+            print("Wrong type input.. poetry run main [STRING] [INT] ")
+            exit()
 
-    figures = get_figure()
+    figures = get_figure(file_prefix_length)
     for f in figures:
         export_png(f, filename=f"imgs/{file_prefix}-{f.title.text}.png")
 
-
-def read_data(tool: str):
+def read_data(tool: str, prefixlength : int):
     path = "./output/" + tool + "/outcomes/"
     graph_data = defaultdict(list)
     for filename in os.listdir(path):
@@ -52,10 +56,41 @@ def read_data(tool: str):
 
 
     for _, v in graph_data.items():
-        v.sort()
+        v.sort(key=lambda t: gen_key(t[0][int(prefixlength):]))
 
     return graph_data
 
+def gen_key(string):
+    print(string)
+    sum = 0
+    counter = 100000
+    for v in string.split("."):
+        try:
+            sum += int(v) * (10 * counter)
+        except:
+            sp = 0
+            for l in v:
+                try:
+                    int(l)
+                    sp += 1
+                except:
+                    break
+            sum += int(v[0:sp]) * (10 * counter)
+        counter = counter / 10
+    for l in string[2:]:
+        if l.lower() == "-":
+            continue
+        if l.lower() == "r":
+            sum -= 60
+            continue
+        if l.lower() == "c":
+            sum -= 60
+            continue
+        if l.lower() == "m":
+            sum -= 200
+            continue
+        sum += ord(l)
+    return sum
 
 def get_tag_number(tool: str, filename):
     path = "./output/" + tool + "/metadata/"
@@ -103,9 +138,9 @@ def _get_line(
     return p
 
 
-def get_figure() -> List[figure]:
-    code_climate_data = read_data("code_climate")
-    modu_data = read_data("modu")
+def get_figure(prefixlength : int) -> List[figure]:
+    code_climate_data = read_data("code_climate", prefixlength)
+    modu_data = read_data("modu", prefixlength)
     figures = []
     for metric, code_climate_values in code_climate_data.items():
         # coupled with the the modu tool, since all metrics of the of modu's
