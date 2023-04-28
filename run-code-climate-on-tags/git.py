@@ -24,8 +24,6 @@ def switch_repo(testing_repo: Path, github_slug: str):
     subprocess.run([f"cd {testing_repo} && git fetch target"], shell=True)
     subprocess.run([f"cd {testing_repo} && git fetch target --tags"], shell=True)
     subprocess.run([f"cd {testing_repo} && git checkout main"], shell=True)
-    subprocess.run([f"cd {testing_repo} && git reset --hard target/main"], shell=True)
-    subprocess.run([f"cd {testing_repo} && git push -f"], shell=True)
 
 
 def reset_repo(testing_repo: Path, commit: str):

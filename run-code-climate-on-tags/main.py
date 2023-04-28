@@ -1,10 +1,12 @@
 import os
 import sys
-import requests
 import logging
 import time
 import csv
 import git
+
+
+import code_climate
 
 from pathlib import Path
 from typing import Dict, List
@@ -16,6 +18,8 @@ CODE_CLIMATE_REPO = "parameterIT/testing"
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     if ACCESS_TOKEN is None:
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
@@ -44,65 +48,32 @@ def main():
 
 
 def work(tag: str):
-    # Assumes that GitHub slug has a "global scope" that can be referenced through sys.argv[1]
-    github_slug = sys.argv[1]
+    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
+    github_slug = sys.argv[2]
 
-    block_while_build_is_running()
+    repo_id = client.get_id_for_repo("parameterIT/testing")
+    latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
+    logging.info(f"blocked by build {latest_build.id} with state {latest_build.state}")
+    client.block_until_complete(latest_build)
+
+    snapshot = client.get_latest_snapshot("parameterIT/testing")
+    logging.info(f"latest snapshot {snapshot.id}")
+
+    issues = client.get_all_issues(snapshot)
     results = {}
     locations = []
-
-    for issue in get_issues():
-        check_name = issue["attributes"]["check_name"]
-        category = issue["attributes"]["categories"][0]
+    for issue in issues:
         try:
-            results[check_name] = results[check_name] + 1
+            results[issue.metric] = results[issue.metric] + 1
         except KeyError:
-            results[check_name] = 1
+            results[issue.metric] = 1
 
         try:
-            results[category] = results[category] + 1
+            results[issue.aggregates_into] = results[issue.aggregates_into] + 1
         except KeyError:
-            results[category] = 1
-
-        location = issue["attributes"]["location"]
-        # This fits with the .csv format: type, file, start, end
-        locations.append(
-            [check_name, location["path"], location["start_line"], location["end_line"]]
-        )
+            results[issue.aggregates_into] = 1
 
     write_to_csv(results, locations, github_slug, tag)
-
-
-def get_repo():
-    """
-    gets a repo from the github slug. github slug is a "username/reponame" format
-    """
-    target = f"https://api.codeclimate.com/v1/repos?github_slug={CODE_CLIMATE_REPO}"
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    return r.json()
-
-
-def get_latest_build_snapshot():
-    repo = get_repo()
-    latest_build_snapshot = repo["data"][0]["relationships"][
-        "latest_default_branch_snapshot"
-    ]["data"]["id"]
-    return latest_build_snapshot
-
-
-def get_issues():
-    repo_id = get_repo()["data"][0]["id"]
-    snapshot_id = get_latest_build_snapshot()
-
-    target = (
-        f"https://api.codeclimate.com/v1/repos/{repo_id}/snapshots/{snapshot_id}/issues"
-    )
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    return r.json()["data"]
 
 
 def write_to_csv(results: Dict, locations: List, src_root: str, tag: str):
@@ -143,27 +114,6 @@ def _write_locations(file_name: Path, locations: List):
         writer = csv.writer(locations_file)
         writer.writerow(["type", "file", "start", "end"])
         writer.writerows(locations)
-
-
-def get_builds():
-    repo_id = get_repo()["data"][0]["id"]
-
-    target = f"https://api.codeclimate.com/v1/repos/{repo_id}/builds"
-    headers = {"Authorization": f"Token token={ACCESS_TOKEN}"}
-
-    r = requests.get(target, headers=headers)
-    return r.json()["data"]
-
-
-def block_while_build_is_running():
-    should_check_builds = True
-    while should_check_builds == True:
-        builds = get_builds()
-        should_check_builds = False
-        for build in builds:
-            if build["attributes"]["state"] == "running":
-                should_check_builds = True
-        time.sleep(10)
 
 
 if __name__ == "__main__":
