@@ -25,12 +25,9 @@ def main():
             print("Wrong type input.. poetry run main [STRING] [INT] ")
             exit()
 
-
-
     figures = get_figure(file_prefix_length)
     for f in figures:
         export_png(f, filename=f"imgs/{file_prefix}-{f.title.text}.png")
-
 
 def read_data(tool: str, prefixlength : int):
     path = "./output/" + tool + "/outcomes/"
