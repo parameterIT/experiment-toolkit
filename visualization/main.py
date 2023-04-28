@@ -19,13 +19,14 @@ def main():
         # The second argument passed to the program is a common file prefix for output
         # png files for better organisation, not passing the argument adds no prefix
         file_prefix = sys.argv[1]
+        file_prefix_length = sys.argv[2]
 
-    figures = get_figure()
+    figures = get_figure(file_prefix_length)
     for f in figures:
         export_png(f, filename=f"imgs/{file_prefix}-{f.title.text}.png")
 
 
-def read_data(tool: str):
+def read_data(tool: str, prefixlength : int):
     path = "./output/" + tool + "/outcomes/"
     graph_data = defaultdict(list)
     for filename in os.listdir(path):
@@ -52,7 +53,7 @@ def read_data(tool: str):
 
 
     for _, v in graph_data.items():
-        v.sort(key=lambda t: gen_key(t[0][16:]))
+        v.sort(key=lambda t: gen_key(t[0][prefixlength:]))
 
     return graph_data
 
@@ -134,9 +135,9 @@ def _get_line(
     return p
 
 
-def get_figure() -> List[figure]:
-    code_climate_data = read_data("code_climate")
-    modu_data = read_data("modu")
+def get_figure(prefixlength : int) -> List[figure]:
+    code_climate_data = read_data("code_climate", prefixlength)
+    modu_data = read_data("modu", prefixlength)
     figures = []
     for metric, code_climate_values in code_climate_data.items():
         # coupled with the the modu tool, since all metrics of the of modu's
