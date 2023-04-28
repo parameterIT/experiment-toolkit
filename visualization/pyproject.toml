@@ -1,10 +1,9 @@
 [tool.poetry]
-name = "comparison-graphs"
+name = "visualization"
 version = "0.1.0"
 description = "Creating graphs on the basis of .csv files"
 authors = ["Frederik Rothe <frot@itu.dk>"]
 readme = "README.md"
-packages = [{include = "comparison_graphs"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

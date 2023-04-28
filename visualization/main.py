@@ -9,6 +9,9 @@ import pandas as pd
 from typing import List, Tuple
 import sys
 
+all_metrics = [
+    "method_lines", "file_lines", "argument_count", "complex_logic", "method_count", "return_statements", "identical-code", "similar-code", "nested_control_flow", "cognitive-complexity", "duplication"
+    ]
 
 def main():
     file_prefix = ""
@@ -23,7 +26,7 @@ def main():
 
 
 def read_data(tool: str):
-    path = "./output/" + tool + "/outcome/"
+    path = "./output/" + tool + "/outcomes/"
     graph_data = defaultdict(list)
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
@@ -39,10 +42,18 @@ def read_data(tool: str):
         )
 
         for metric, value in df.itertuples(index=False, name=None):
-            graph_data[metric].append((tag_number, value))
+            graph_data[metric.lower()].append((tag_number, value))
+            print("Adding", value, "for", metric, "for tag", tag_number)
+
+        for metric in all_metrics:
+            if len(graph_data[metric]) == 0 or graph_data[metric][len(graph_data[metric])-1][0] != tag_number:
+                graph_data[metric].append((tag_number, 0))
+                print("Adding 0 for", metric, "for tag", tag_number)
+
 
     for _, v in graph_data.items():
-        v.sort(key=lambda t: list(map(int, t[0].split("-")[1].split("."))))
+        v.sort()
+
     return graph_data
 
 
@@ -109,7 +120,6 @@ def get_figure() -> List[figure]:
             modu_values = modu_data["identical_code"]
         elif metric == "similar-code":
             modu_values = modu_data["similar_code"]
-
         figures.append(_get_line(code_climate_values, modu_values, metric))
 
     return figures
