@@ -61,9 +61,8 @@ def read_data(tool: str, prefixlength : int):
     return graph_data
 
 def gen_key(string):
-    print(string)
     sum = 0
-    counter = 100000
+    counter = 1000000000
     for v in string.split("."):
         try:
             sum += int(v) * (10 * counter)
@@ -76,7 +75,7 @@ def gen_key(string):
                 except:
                     break
             sum += int(v[0:sp]) * (10 * counter)
-        counter = counter / 10
+        counter = counter / 100
     for l in string[2:]:
         if l.lower() == "-":
             continue
