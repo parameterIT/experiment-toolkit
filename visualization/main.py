@@ -35,15 +35,25 @@ def read_data(tool: str, prefixlength : int):
     for filename in os.listdir(path):
         filepath = os.path.join(path, filename)
         tag_number = get_tag_number(tool, filename)
-        df = pd.read_csv(
-            filepath,
-            skiprows=0,
-            dtype={"value": int, "metric": str},
-            # Assumes that maintainabilty (the only non-int value) is at the bottom of
-            # each csv file
-            skipfooter=1,
-            engine="python",
-        )
+
+        df = None;
+        if tool == "modu":
+            df = pd.read_csv(
+                filepath,
+                skiprows=0,
+                dtype={"value": int, "metric": str},
+                # Assumes that maintainabilty (the only non-int value) is at the bottom of
+                # each csv file
+                skipfooter=1,
+                engine="python",
+            )
+        elif tool == "code_climate":
+            df = pd.read_csv(
+                filepath,
+                skiprows=0,
+                dtype={"value": int, "metric": str},
+                engine="python",
+            )
 
         for metric, value in df.itertuples(index=False, name=None):
             graph_data[metric.lower()].append((tag_number, value))
@@ -61,6 +71,7 @@ def read_data(tool: str, prefixlength : int):
     return graph_data
 
 def gen_key(string):
+    print(string)
     sum = 0
     counter = 1000000000
     for v in string.split("."):
