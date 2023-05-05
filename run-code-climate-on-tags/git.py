@@ -33,5 +33,13 @@ def reset_repo(testing_repo: Path, commit: str):
 
 def iterate_over_tags(tags: List, action_between_tags: Callable, testing_repo: Path):
     for tag in tags:
-        reset_repo(testing_repo, tag)
         action_between_tags(tag)
+        reset_repo(testing_repo, tag)
+
+def tag_to_commit_mapping(dir_name: Path):
+    tags = read_tags(dir_name)
+    tag_to_commit = {}
+    for tag in tags:
+        commit_out = subprocess.check_output([f"cd {dir_name} && git log {tag} -1 --pretty=%H"], shell=True)
+        tag_to_commit.update({tag: commit_out.decode("utf-8").strip()})
+    return tag_to_commit

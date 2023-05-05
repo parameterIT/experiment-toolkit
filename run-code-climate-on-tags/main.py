@@ -41,10 +41,42 @@ def main():
         print(USAGE_STRING)
 
     github_slug = sys.argv[2]
-    git.switch_repo(testing_repo, github_slug)
 
-    tags = git.read_tags(target_dir)
-    git.iterate_over_tags(tags, work, testing_repo)
+    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
+    repo_id = client.get_id_for_repo("parameterIT/testing")
+    builds = client.get_builds(repo_id)
+
+    tag_to_commit = git.tag_to_commit_mapping(target_dir)
+    for tag, commit in tag_to_commit.items():
+        # Find the snapshot
+        snapshot_id = ""
+        for build in builds:
+            if build.commit_sha == commit and build.state == "complete":
+                snapshot_id = build.snapshot_id
+        # Get all issues for that snapshot
+        snapshot = client.get_snapshot_by_id(snapshot_id, repo_id)
+        issues = client.get_all_issues(snapshot)
+        logging.info(f"Got {len(issues)} for {tag} at {commit}")
+        # Copy and paste the writing logic
+        results = {}
+        locations = []
+        for issue in issues:
+            try:
+                results[issue.metric] = results[issue.metric] + 1
+            except KeyError:
+                results[issue.metric] = 1
+
+            try:
+                results[issue.aggregates_into] = results[issue.aggregates_into] + 1
+            except KeyError:
+                results[issue.aggregates_into] = 1
+
+        write_to_csv(results, locations, github_slug, tag)
+
+    # git.switch_repo(testing_repo, github_slug)
+
+    # tags = git.read_tags(target_dir)
+    # git.iterate_over_tags(tags, work, testing_repo)
 
 
 def work(tag: str):

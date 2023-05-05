@@ -18,6 +18,13 @@ class Build:
         self.number = number
         self.state = state
 
+class BetterBuild:
+    def __init__(self, id: str, repo_id: str, state: str, commit_sha: str, snapshot_id: str | None):
+        self.id = id
+        self.repo_id = repo_id
+        self.state = state
+        self.commit_sha = commit_sha
+        self.snapshot_id = snapshot_id
 
 class Snapshot:
     def __init__(self, id: str, repo_id: str, issue_count: int):
@@ -107,8 +114,20 @@ class Client:
         json_resp = resp.json()
 
         issue_count = int(json_resp["data"]["meta"]["issues_count"])
+        logging.info(issue_count)
+
 
         return Snapshot(snapshot_id, repo_id, issue_count)
+
+    def get_snapshot_by_id(self, snapshot_id: str, repo_id: str):
+        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/snapshots/{snapshot_id}"
+
+        resp = self.session.get(target)
+        json_resp = resp.json()
+
+        issue_count = int(json_resp["data"]["meta"]["issues_count"])
+        return Snapshot(snapshot_id, repo_id, issue_count)
+
 
     def get_all_issues(self, snapshot: Snapshot) -> List[Issue]:
         all_issues = []
@@ -137,3 +156,31 @@ class Client:
             logging.info(f"polling build {build.id} last known state {build.state}")
             build = self.get_build(build.number, build.repo_id)
             time.sleep(10)
+
+    def get_builds(self, repo_id: str) -> List[BetterBuild]:
+        has_next = True
+        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]=1&page[size]=100"
+        builds = []
+        while has_next:
+            resp = self.session.get(target)
+            json_resp = resp.json()
+
+            for b in json_resp["data"]:
+                id = b["id"]
+                state = b["attributes"]["state"]
+                commit_sha = b["attributes"]["commit_sha"]
+                snapshot_id = None
+                if state == "complete":
+                    snapshot_id = b["relationships"]["snapshot"]["data"]["id"]
+
+                build = BetterBuild(id, repo_id, state, commit_sha, snapshot_id)
+                builds.append(build)
+
+            links = json_resp["links"]
+            if "next" in links:
+                has_next = True
+                target = links["next"]
+            else:
+                has_next = False
+
+        return builds
