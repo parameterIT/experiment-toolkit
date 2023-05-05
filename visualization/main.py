@@ -138,6 +138,7 @@ def _get_line(
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
+    p.add_layout(p.legend[0], "right")
     max_element = max(one_qm_ys + other_qm_ys)
     try:
         if max_element != 0:
@@ -153,7 +154,7 @@ def get_figure(prefixlength : int) -> List[figure]:
     modu_data = read_data("modu", prefixlength)
     figures = []
     for metric, code_climate_values in code_climate_data.items():
-        # coupled with the the modu tool, since all metrics of the of modu's
+        # coupled with the modu tool, since all metrics of the of modu's
         # implementation of code climate are lower-case
         modu_values = modu_data[metric.lower()]
         # if-elif chain coupled with the modu tool to translate metrics reported by
