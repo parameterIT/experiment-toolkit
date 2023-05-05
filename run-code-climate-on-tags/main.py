@@ -75,6 +75,8 @@ def main():
             except KeyError:
                 results[issue.aggregates_into] = 1
 
+        # Ensure that each file is written with at least 1 seconds between them as to not overwrite files
+        time.sleep(1)
         write_to_csv(results, locations, github_slug, tag)
 
     # git.switch_repo(testing_repo, github_slug)
