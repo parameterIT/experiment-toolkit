@@ -53,6 +53,10 @@ def main():
         for build in builds:
             if build.commit_sha == commit and build.state == "complete":
                 snapshot_id = build.snapshot_id
+
+        if snapshot_id == "":
+            logging.error(f"No snapshot found for tag {tag} at {commit}, exiting...")
+            exit(1)
         # Get all issues for that snapshot
         snapshot = client.get_snapshot_by_id(snapshot_id, repo_id)
         issues = client.get_all_issues(snapshot)
