@@ -184,3 +184,22 @@ class Client:
                 has_next = False
 
         return builds
+
+    def get_build_page(self, repo_id: str, page: int) -> List[BetterBuild]:
+        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]={[page]}&page[size]=100"
+        builds = []
+        resp = self.session.get(target)
+        json_resp = resp.json()
+
+        for b in json_resp["data"]:
+            id = b["id"]
+            state = b["attributes"]["state"]
+            commit_sha = b["attributes"]["commit_sha"]
+            snapshot_id = None
+            if state == "complete":
+                snapshot_id = b["relationships"]["snapshot"]["data"]["id"]
+
+            build = BetterBuild(id, repo_id, state, commit_sha, snapshot_id)
+            builds.append(build)
+
+        return builds

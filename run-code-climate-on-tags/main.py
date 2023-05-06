@@ -5,7 +5,6 @@ import time
 import csv
 import git
 
-
 import code_climate
 
 from pathlib import Path
@@ -42,11 +41,33 @@ def main():
 
     github_slug = sys.argv[2]
 
+    tag_to_commit = git.tag_to_commit_mapping(target_dir)
+
     client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
     repo_id = client.get_id_for_repo("parameterIT/testing")
     builds = client.get_builds(repo_id)
 
-    tag_to_commit = git.tag_to_commit_mapping(target_dir)
+    commits_with_no_builds = list(tag_to_commit.values())
+    for _, commit in tag_to_commit.items():
+        for build in builds:
+            if build.commit_sha == commit:
+                commits_with_no_builds.remove(commit)
+
+    # Force the git repository to the tag.
+    for commit in commits_with_no_builds:
+        logging.info(f"{commit} is missing from builds, pushing it and waiting for the build to complete")
+        git.reset_repo(testing_repo, commit)
+
+        # There are inconsistent timings on when the builds start
+        # Get the first page of builds and see if it contains the commit sha, otherwise wait 10 seconds and try again
+        is_build_complete = False
+        while not is_build_complete:
+            time.sleep(10)
+            builds = client.get_build_page(repo_id, 1)
+            for build in builds:
+                if build.commit_sha == commit and build.state == "complete":
+                    is_build_complete = True
+
     for tag, commit in tag_to_commit.items():
         # Find the snapshot
         snapshot_id = ""
@@ -78,40 +99,6 @@ def main():
         # Ensure that each file is written with at least 1 seconds between them as to not overwrite files
         time.sleep(1)
         write_to_csv(results, locations, github_slug, tag)
-
-    # git.switch_repo(testing_repo, github_slug)
-
-    # tags = git.read_tags(target_dir)
-    # git.iterate_over_tags(tags, work, testing_repo)
-
-
-def work(tag: str):
-    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
-    github_slug = sys.argv[2]
-
-    repo_id = client.get_id_for_repo("parameterIT/testing")
-    latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
-    logging.info(f"blocked by build {latest_build.id} with state {latest_build.state}")
-    client.block_until_complete(latest_build)
-
-    snapshot = client.get_latest_snapshot("parameterIT/testing")
-    logging.info(f"latest snapshot {snapshot.id}")
-
-    issues = client.get_all_issues(snapshot)
-    results = {}
-    locations = []
-    for issue in issues:
-        try:
-            results[issue.metric] = results[issue.metric] + 1
-        except KeyError:
-            results[issue.metric] = 1
-
-        try:
-            results[issue.aggregates_into] = results[issue.aggregates_into] + 1
-        except KeyError:
-            results[issue.aggregates_into] = 1
-
-    write_to_csv(results, locations, github_slug, tag)
 
 
 def write_to_csv(results: Dict, locations: List, src_root: str, tag: str):
