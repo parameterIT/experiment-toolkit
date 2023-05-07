@@ -66,6 +66,7 @@ def main():
         while not is_build_complete:
             logging.info("Sleeping for 10 seconds...")
             time.sleep(10)
+            # Builds are in chronological order, so newest one should be on the first page
             builds = client.get_build_page(repo_id, 1)
             for build in builds:
                 logging.info(f"Looking at build {build.id} for {build.commit_sha} with state {build.state}")

@@ -11,20 +11,15 @@ import urllib3
 _BASE_CODE_CLIMATE_URL = "https://api.codeclimate.com/v1/"
 _PAGE_SIZE: int = 100
 
-class Build:
-    def __init__(self, id: str, repo_id: str, number: int, state: str):
-        self.id = id
-        self.repo_id = repo_id
-        self.number = number
-        self.state = state
 
-class BetterBuild:
+class Build:
     def __init__(self, id: str, repo_id: str, state: str, commit_sha: str, snapshot_id: str | None):
         self.id = id
         self.repo_id = repo_id
         self.state = state
         self.commit_sha = commit_sha
         self.snapshot_id = snapshot_id
+
 
 class Snapshot:
     def __init__(self, id: str, repo_id: str, issue_count: int):
@@ -63,39 +58,6 @@ class Client:
         repo_id = json_resp["data"][0]["id"]
 
         return repo_id
-
-    def get_latest_build_for(self, repo_id: str) -> Build:
-        """
-        Returns the latest build for the given repo id, assuming that the first build
-        on the first page corresponds to the latest build number.
-
-        The build number should be the maximum of all build numbers
-        """
-        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]=1&page[size]=1"
-
-        resp = self.session.get(target)
-        json_resp = resp.json()
-
-        id = json_resp["data"][0]["id"]
-        number = json_resp["data"][0]["attributes"]["number"]
-        state = json_resp["data"][0]["attributes"]["state"]
-
-        return Build(id, repo_id, number, state)
-
-    def get_build(self, number: int, repo_id: str) -> Build:
-        """
-        Return the build of the specific build number, assuming that the build number exists.
-        """
-        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds/{number}"
-
-        resp = self.session.get(target)
-        json_resp = resp.json()
-
-        id = json_resp["data"]["id"]
-        number = json_resp["data"]["attributes"]["number"]
-        state = json_resp["data"]["attributes"]["state"]
-
-        return Build(id, repo_id, number, state)
 
     def get_latest_snapshot(self, github_slug: str):
         target = f"{_BASE_CODE_CLIMATE_URL}repos?github_slug={github_slug}"
@@ -147,17 +109,7 @@ class Client:
 
         return all_issues
 
-    def block_until_complete(self, build: Build):
-        if build.state == "complete" or build.state == "errored":
-            # Most recent build is already complete / had an error
-            return
-
-        while build.state == "running":
-            logging.info(f"polling build {build.id} last known state {build.state}")
-            build = self.get_build(build.number, build.repo_id)
-            time.sleep(10)
-
-    def get_builds(self, repo_id: str) -> List[BetterBuild]:
+    def get_builds(self, repo_id: str) -> List[Build]:
         has_next = True
         target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]=1&page[size]=100"
         builds = []
@@ -173,7 +125,7 @@ class Client:
                 if state == "complete":
                     snapshot_id = b["relationships"]["snapshot"]["data"]["id"]
 
-                build = BetterBuild(id, repo_id, state, commit_sha, snapshot_id)
+                build = Build(id, repo_id, state, commit_sha, snapshot_id)
                 builds.append(build)
 
             links = json_resp["links"]
@@ -185,7 +137,7 @@ class Client:
 
         return builds
 
-    def get_build_page(self, repo_id: str, page: int) -> List[BetterBuild]:
+    def get_build_page(self, repo_id: str, page: int) -> List[Build]:
         target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]={page}&page[size]=100"
         builds = []
         resp = self.session.get(target)
@@ -199,7 +151,7 @@ class Client:
             if state == "complete":
                 snapshot_id = b["relationships"]["snapshot"]["data"]["id"]
 
-            build = BetterBuild(id, repo_id, state, commit_sha, snapshot_id)
+            build = Build(id, repo_id, state, commit_sha, snapshot_id)
             builds.append(build)
 
         return builds
