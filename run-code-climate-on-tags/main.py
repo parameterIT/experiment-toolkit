@@ -10,11 +10,9 @@ import code_climate
 from pathlib import Path
 from typing import Dict, List
 
-USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG> <Testing Repo>\nwhere GITHUB_SLUG is in the format 'username/reponame' on GitHub"
+USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG_OF_REPO_TO_ANALYZE> <Testing Repo> <REMOTE_TESTING_REPO> \nwhere GITHUB_SLUG is in the format 'username/reponame' on GitHub"
 
 ACCESS_TOKEN = os.getenv("CODE_CLIMATE_TOKEN")
-CODE_CLIMATE_REPO = "parameterIT/testing"
-
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -23,7 +21,7 @@ def main():
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         logging.error("Incorrect number of arguments supplied")
         print(USAGE_STRING)
         exit(1)
@@ -40,11 +38,15 @@ def main():
         print(USAGE_STRING)
 
     github_slug = sys.argv[2]
+    testing_github_slug = sys.argv[4]
+
+    git.switch_repo(testing_repo, github_slug)
 
     tag_to_commit = git.tag_to_commit_mapping(target_dir)
 
     client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
-    repo_id = client.get_id_for_repo("parameterIT/testing")
+    repo_id = client.get_id_for_repo(testing_github_slug)
+    logging.info(f"Id for {testing_github_slug} is {repo_id}")
     builds = client.get_builds(repo_id)
 
     commits_with_no_builds = list(tag_to_commit.values())
@@ -62,9 +64,11 @@ def main():
         # Get the first page of builds and see if it contains the commit sha, otherwise wait 10 seconds and try again
         is_build_complete = False
         while not is_build_complete:
+            logging.info("Sleeping for 10 seconds...")
             time.sleep(10)
             builds = client.get_build_page(repo_id, 1)
             for build in builds:
+                logging.info(f"Looking at build {build.id} for {build.commit_sha} with state {build.state}")
                 if build.commit_sha == commit and build.state == "complete":
                     is_build_complete = True
 

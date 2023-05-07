@@ -186,7 +186,7 @@ class Client:
         return builds
 
     def get_build_page(self, repo_id: str, page: int) -> List[BetterBuild]:
-        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]={[page]}&page[size]=100"
+        target = f"{_BASE_CODE_CLIMATE_URL}repos/{repo_id}/builds?page[number]={page}&page[size]=100"
         builds = []
         resp = self.session.get(target)
         json_resp = resp.json()

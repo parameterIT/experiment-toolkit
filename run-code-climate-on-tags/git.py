@@ -28,7 +28,7 @@ def switch_repo(testing_repo: Path, github_slug: str):
 
 def reset_repo(testing_repo: Path, commit: str):
     subprocess.run([f"cd {testing_repo} && git reset --hard {commit}"], shell=True)
-    subprocess.run([f"cd {testing_repo} && git push -f"], shell=True)
+    subprocess.run([f"cd {testing_repo} && git push origin -f"], shell=True)
 
 
 def iterate_over_tags(tags: List, action_between_tags: Callable, testing_repo: Path):
