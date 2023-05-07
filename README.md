@@ -6,19 +6,21 @@ It consists of four components:
 
 1. A bash script that transforms a local git repository into a folder per tag of that git repository
 2. A python program that will run [modu](https://github.com/parameterIT/tool/) on each sub-directory of a given directory (this will be paired with script (1))
-3. A python program that runs code climate on each sub-directory of a given directory (this will be paired with script (1))
+3. A python program that will run code climate on each tag of a git repository
 4. A python program that compares the results of (2) and (3) visually on line graphs
 
 ## Requirements
 
 - Many of the provided scripts and programs make use of your local installation of _git_, so make that it is set-up and available in your PATH.
+- The scripts also use SSH to interact with GitHub through git, you should [generate SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) and [add them to GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
 - Component (2) requires a local installation of _modu_. The project's [README](https://github.com/parameterIT/tool/blob/main/README.md) describes how to set it up
 - To visualize the results we use [_Bokeh_](https://docs.bokeh.org/en/latest/index.html), which requires [additional set-up](https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html) for exporting the graphs to PNG files
-- It requires that you have push access to and a local copy of [parameterIT's testing repository](https://github.com/parameterIT/testing)
 
 ## Running
 
 ### Preparing the Data
+
+#### For _modu_ 
 
 First it will be necessary to transform a git repository into a series of folders each containing that git repository's contents at a specific version.
 The following command (from the `experiment-toolkit` folder) executes a bash script which automates this process:
@@ -53,6 +55,20 @@ flask-tags
   \_ flask-0.12
   \_ ...
 ```
+
+#### For Code Climate
+
+You will need a Code Climate account.
+Once you have a Code Climate account create a git repository for Code Climate to analyze on GitHub.
+The contents of this git repository will updated automatically by program (3).
+
+Clone your git repository, for example in parameterIT we used the _parameterIT/testing_ repository:
+
+```sh
+git clone git@github.com:parameterIT/testing.git
+```
+
+Next you should log-in to your Code Climate account and add the git repository you just cloned to Code Climate.
 
 ### Executing _modu_
 
@@ -121,7 +137,7 @@ Remember to save the file.
 Now, run the Code Climate tool by using the following command. NOTE: github-slug is in the format `username/repository-name`:
 
 ```sh
-./run.sh <path to local copy of repository> <github-slug of the remote of the repo> <path to testing repository>
+./run.sh <path to local copy of repository> <github-slug of the remote of the repo> <path to testing repository> <github slug of the remote of the testing repo>
 ```
 
 For example with the directory structure:
@@ -137,7 +153,7 @@ testing
 
 You can run the command:
 ```sh
-./run.sh ../../flask pallets/flask ../../testing
+./run.sh ../../flask pallets/flask ../../testing parameterIT/testing
 ```
 
 This will produce .csv files that match the format of _modu_ using results gathered through code climate in the `experiment-toolkit/run-code-climate-on-tags/output` folder.
