@@ -5,17 +5,14 @@ import time
 import csv
 import git
 
-
 import code_climate
 
 from pathlib import Path
 from typing import Dict, List
 
-USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG> <Testing Repo>\nwhere GITHUB_SLUG is in the format 'username/reponame' on GitHub"
+USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLUG_OF_REPO_TO_ANALYZE> <Testing Repo> <REMOTE_TESTING_REPO> \nwhere GITHUB_SLUG is in the format 'username/reponame' on GitHub"
 
 ACCESS_TOKEN = os.getenv("CODE_CLIMATE_TOKEN")
-CODE_CLIMATE_REPO = "parameterIT/testing"
-
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -24,7 +21,7 @@ def main():
         logging.error("CODE_CLIMATE_TOKEN environment variable must be set")
         exit(1)
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         logging.error("Incorrect number of arguments supplied")
         print(USAGE_STRING)
         exit(1)
@@ -41,12 +38,41 @@ def main():
         print(USAGE_STRING)
 
     github_slug = sys.argv[2]
+    testing_github_slug = sys.argv[4]
 
-    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
-    repo_id = client.get_id_for_repo("parameterIT/testing")
-    builds = client.get_builds(repo_id)
+    git.switch_repo(testing_repo, github_slug)
 
     tag_to_commit = git.tag_to_commit_mapping(target_dir)
+
+    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
+    repo_id = client.get_id_for_repo(testing_github_slug)
+    logging.info(f"Id for {testing_github_slug} is {repo_id}")
+    builds = client.get_builds(repo_id)
+
+    commits_with_no_builds = list(tag_to_commit.values())
+    for _, commit in tag_to_commit.items():
+        for build in builds:
+            if build.commit_sha == commit:
+                commits_with_no_builds.remove(commit)
+
+    # Force the git repository to the tag.
+    for commit in commits_with_no_builds:
+        logging.info(f"{commit} is missing from builds, pushing it and waiting for the build to complete")
+        git.reset_repo(testing_repo, commit)
+
+        # There are inconsistent timings on when the builds start
+        # Get the first page of builds and see if it contains the commit sha, otherwise wait 10 seconds and try again
+        is_build_complete = False
+        while not is_build_complete:
+            logging.info("Sleeping for 10 seconds...")
+            time.sleep(10)
+            # Builds are in chronological order, so newest one should be on the first page
+            builds = client.get_build_page(repo_id, 1)
+            for build in builds:
+                logging.info(f"Looking at build {build.id} for {build.commit_sha} with state {build.state}")
+                if build.commit_sha == commit and build.state == "complete":
+                    is_build_complete = True
+
     for tag, commit in tag_to_commit.items():
         # Find the snapshot
         snapshot_id = ""
@@ -78,40 +104,6 @@ def main():
         # Ensure that each file is written with at least 1 seconds between them as to not overwrite files
         time.sleep(1)
         write_to_csv(results, locations, github_slug, tag)
-
-    # git.switch_repo(testing_repo, github_slug)
-
-    # tags = git.read_tags(target_dir)
-    # git.iterate_over_tags(tags, work, testing_repo)
-
-
-def work(tag: str):
-    client: code_climate.Client = code_climate.Client(ACCESS_TOKEN)
-    github_slug = sys.argv[2]
-
-    repo_id = client.get_id_for_repo("parameterIT/testing")
-    latest_build: code_climate.Build = client.get_latest_build_for(repo_id)
-    logging.info(f"blocked by build {latest_build.id} with state {latest_build.state}")
-    client.block_until_complete(latest_build)
-
-    snapshot = client.get_latest_snapshot("parameterIT/testing")
-    logging.info(f"latest snapshot {snapshot.id}")
-
-    issues = client.get_all_issues(snapshot)
-    results = {}
-    locations = []
-    for issue in issues:
-        try:
-            results[issue.metric] = results[issue.metric] + 1
-        except KeyError:
-            results[issue.metric] = 1
-
-        try:
-            results[issue.aggregates_into] = results[issue.aggregates_into] + 1
-        except KeyError:
-            results[issue.aggregates_into] = 1
-
-    write_to_csv(results, locations, github_slug, tag)
 
 
 def write_to_csv(results: Dict, locations: List, src_root: str, tag: str):
