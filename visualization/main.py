@@ -110,35 +110,38 @@ def get_tag_number(tool: str, filename):
         path_parts = src.split("/")
         return path_parts[len(path_parts) - 1]
 
-
 def _get_line(
     one_qm_data: List[Tuple[int, str]],
     other_qm_data: List[Tuple[int, str]],
     metric: str,
 ):
-    one_qm_xs = [data_point[0] for data_point in one_qm_data]
+    prefixlength = int(sys.argv[2])
+    # This line reads whether it is "flask", "newtonsoft" or "spring-graphql"
+    source = one_qm_data[0][0][0:prefixlength-1]
+    one_qm_xs = [data_point[0][prefixlength:] for data_point in one_qm_data]
     one_qm_ys = [data_point[1] for data_point in one_qm_data]
-    other_qm_xs = [data_point[0] for data_point in other_qm_data]
+    other_qm_xs = [data_point[0][prefixlength:] for data_point in other_qm_data]
     other_qm_ys = [data_point[1] for data_point in other_qm_data]
 
     p = figure(
         width=600,
         height=350,
-        title=metric,
+        title=f"Line Graph Showing the Development of {metric} Over Time for {source}",
         x_range=one_qm_xs,
         x_axis_label="Tag",
         y_axis_label="No. Violations",
     )
-    p.line(one_qm_xs, one_qm_ys, legend_label="code_climate", line_width=2)
+    p.line(one_qm_xs, one_qm_ys, legend_label="Code Climate", line_width=2)
     p.line(
         other_qm_xs,
         other_qm_ys,
-        legend_label="modu",
+        legend_label="Modu's Reimplementation",
         line_width=2,
         color="red",
     )
     p.xaxis.major_label_orientation = "vertical"
     p.add_layout(p.legend[0], "right")
+    p.toolbar.autohide = True
     max_element = max(one_qm_ys + other_qm_ys)
     try:
         if max_element != 0:
