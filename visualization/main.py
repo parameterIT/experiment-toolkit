@@ -135,7 +135,7 @@ def _get_line(
     p.line(
         other_qm_xs,
         other_qm_ys,
-        legend_label="Modu's Reimplementation",
+        legend_label="Modu",
         line_width=2,
         color="red",
     )
