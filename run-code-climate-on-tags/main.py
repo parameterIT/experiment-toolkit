@@ -128,7 +128,7 @@ def _write_metadata(file_name: Path, src_root: str, tag: str):
 
 
 def _write_results(file_name: Path, results: Dict):
-    file_location = Path("output") / Path("outcome") / file_name
+    file_location = Path("output") / Path("outcomes") / file_name
 
     with open(file_location, "w") as results_file:
         writer = csv.writer(results_file)
