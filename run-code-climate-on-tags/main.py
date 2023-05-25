@@ -14,6 +14,7 @@ USAGE_STRING = "Usage: main.py <Local Copy of Repository to Analyze> <GITHUB_SLU
 
 ACCESS_TOKEN = os.getenv("CODE_CLIMATE_TOKEN")
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
@@ -53,11 +54,18 @@ def main():
     for _, commit in tag_to_commit.items():
         for build in builds:
             if build.commit_sha == commit:
-                commits_with_no_builds.remove(commit)
+                try:
+                    commits_with_no_builds.remove(commit)
+                except ValueError:
+                    # Sometimes the list doesn't contain a commit, but since the exception is thrown because it should
+                    # be removed its okay that its not there.
+                    continue
 
     # Force the git repository to the tag.
     for commit in commits_with_no_builds:
-        logging.info(f"{commit} is missing from builds, pushing it and waiting for the build to complete")
+        logging.info(
+            f"{commit} is missing from builds, pushing it and waiting for the build to complete"
+        )
         git.reset_repo(testing_repo, commit)
 
         # There are inconsistent timings on when the builds start
@@ -69,9 +77,14 @@ def main():
             # Builds are in chronological order, so newest one should be on the first page
             builds = client.get_build_page(repo_id, 1)
             for build in builds:
-                logging.info(f"Looking at build {build.id} for {build.commit_sha} with state {build.state}")
+                logging.info(
+                    f"Looking at build {build.id} for {build.commit_sha} with state {build.state}"
+                )
                 if build.commit_sha == commit and build.state == "complete":
                     is_build_complete = True
+
+    # get builds again
+    builds = client.get_builds(repo_id)
 
     for tag, commit in tag_to_commit.items():
         # Find the snapshot
