@@ -22,7 +22,7 @@ def switch_repo(testing_repo: Path, github_slug: str):
         shell=True,
     )
     subprocess.run([f"cd {testing_repo} && git fetch target"], shell=True)
-    subprocess.run([f"cd {testing_repo} && git fetch target --tags"], shell=True)
+    subprocess.run([f"cd {testing_repo} && git fetch target --tags --force"], shell=True)
     subprocess.run([f"cd {testing_repo} && git checkout main"], shell=True)
 
 
